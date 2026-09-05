@@ -1,0 +1,3 @@
+[submodule "capture/pico-sdk"]
+	path = capture/pico-sdk
+	url = https://github.com/raspberrypi/pico-sdk.git

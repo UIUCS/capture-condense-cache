@@ -1,0 +1,34 @@
+# Build directories
+build/
+cmake-build-*/
+out/
+compile_commands.json
+
+# Pico SDK build artifacts
+*.elf
+*.bin
+*.hex
+*.uf2
+*.map
+*.dis
+
+# Generated files
+*.pio.h
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+
+# OS / Editor artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~
