@@ -148,6 +148,56 @@ class CacheRepository:
         ).fetchall()
         return [dict(row) for row in rows]
 
+    def get_note(self, note_id: int) -> Optional[Dict[str, Any]]:
+        """Return one note and its extracted data, or None if it does not exist."""
+        note = self._connection.execute(
+            """
+            SELECT notes.id, notes.title, notes.summary, notes.transcript,
+                   notes.created_at, recordings.source_path, recordings.recorded_at,
+                   recordings.duration_ms
+            FROM notes
+            JOIN recordings ON recordings.id = notes.recording_id
+            WHERE notes.id = ?
+            """,
+            (note_id,),
+        ).fetchone()
+        if note is None:
+            return None
+
+        result = dict(note)
+        result["tags"] = [
+            row["name"]
+            for row in self._connection.execute(
+                """
+                SELECT tags.name FROM tags
+                JOIN note_tags ON note_tags.tag_id = tags.id
+                WHERE note_tags.note_id = ? ORDER BY tags.name
+                """,
+                (note_id,),
+            )
+        ]
+        result["action_items"] = [
+            dict(row)
+            for row in self._connection.execute(
+                """
+                SELECT id, description, due_at, completed
+                FROM action_items WHERE note_id = ? ORDER BY due_at IS NULL, due_at, id
+                """,
+                (note_id,),
+            )
+        ]
+        result["contacts"] = [
+            dict(row)
+            for row in self._connection.execute(
+                """
+                SELECT id, name, email, phone, context
+                FROM contacts WHERE note_id = ? ORDER BY name
+                """,
+                (note_id,),
+            )
+        ]
+        return result
+
     def list_open_actions(self) -> List[Dict[str, Any]]:
         """Return incomplete action items, with undated items last."""
         rows = self._connection.execute(

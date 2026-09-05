@@ -66,3 +66,24 @@ Implement three small operations around a single database connection:
 
 Keep filesystem watching, JSON validation, database access, and CLI output in
 separate modules so each can be tested independently.
+
+## Retrieval commands
+
+The cache can be queried directly from the repository root:
+
+```sh
+python3 -m cache --database cache.sqlite3 search 'exam AND "machine learning"'
+python3 -m cache --database cache.sqlite3 actions
+python3 -m cache --database cache.sqlite3 note 12
+```
+
+Use `--json` when another program should consume the results:
+
+```sh
+python3 -m cache --database cache.sqlite3 search 'deadline' --json
+```
+
+The `search` command passes the query to SQLite's `notes_fts MATCH ?` clause
+and orders results by `bm25(notes_fts)`. FTS5 syntax supports `AND`, `OR`,
+quoted phrases, and column filters such as `title:exam`. The query is passed as
+a bound SQL parameter, so user input is not interpolated into SQL.

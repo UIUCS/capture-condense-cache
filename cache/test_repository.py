@@ -59,6 +59,25 @@ class CacheRepositoryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.repository.insert_note({"title": "Missing required fields"})
 
+    def test_get_note_includes_related_data(self) -> None:
+        document = {
+            "schema_version": 1,
+            "source": {"path": "related.wav", "sha256": "c" * 64},
+            "title": "Related note",
+            "summary": "A summary",
+            "transcript": "Some transcript",
+            "tags": ["important"],
+            "action_items": [{"description": "Follow up"}],
+            "contacts": [{"name": "Grace"}],
+        }
+
+        note_id = self.repository.insert_note(document)
+        note = self.repository.get_note(note_id)
+
+        self.assertEqual(note["tags"], ["important"])
+        self.assertEqual(note["action_items"][0]["description"], "Follow up")
+        self.assertEqual(note["contacts"][0]["name"], "Grace")
+
 
 if __name__ == "__main__":
     unittest.main()
